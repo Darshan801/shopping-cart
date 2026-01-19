@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'category'
+    'category',
+    'accounts'
 ]
 
 MIDDLEWARE = [
@@ -68,6 +69,10 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'shoppingcart.wsgi.application'
+
+# registring that we are using custom user model in setting
+
+AUTH_USER_MODEL = 'accounts.Account'
 
 
 # Database
