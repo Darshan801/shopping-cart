@@ -24,14 +24,12 @@ def store(request,category_slug=None):
     return render(request,'store/store.html',context)
 
 def product_detail(request, category_slug, product_slug):
-    single_product = get_object_or_404(
-        Product,
-        category__slug=category_slug,
-        slug=product_slug
-    )
-
-    context = {
-        'single_product': single_product
+    try:
+        single_product = Product.objects.get(category__slug=category_slug,slug=product_slug) #category__slug is basically a syntax double underscore used to access related foregin key
+    except Exception as e:
+        raise e
+    
+    context={
+        'single_product':single_product
     }
-
-    return render(request, 'store/product_detail.html', context)
+    return render(request,'store/product_detail.html',context)
