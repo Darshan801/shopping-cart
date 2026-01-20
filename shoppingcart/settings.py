@@ -126,6 +126,10 @@ STATICFILES_DIRS=[
     'shoppingcart/static',
 ]
 
+# media file configuration
+MEDIA_URL = 'media/'
+MEDIA_ROOT=BASE_DIR /'media'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
