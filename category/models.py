@@ -5,7 +5,7 @@ from django.db import models
 class Category(models.Model):
     category_name= models.CharField(max_length=50,unique=True)
     # slug is basically an url
-    slug =models.CharField(max_length=500,unique=True)
+    slug =models.SlugField(max_length=500,unique=True)
     description=models.TextField(max_length=500, blank=True)
     car_image = models.ImageField(upload_to='photos/category', blank=True)
 
