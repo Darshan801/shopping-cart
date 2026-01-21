@@ -1,4 +1,4 @@
-from django.shortcuts import render , redirect
+from django.shortcuts import render , redirect , get_object_or_404
 from django.http import HttpResponse
 from store.models import Product
 from carts.models import Cart
@@ -46,7 +46,26 @@ def add_cart(request , product_id):
     # return HttpResponse(cart_item.quantity)
     # exit()
     return redirect('cart')
-        
+
+def remove_cart(request, product_id):
+    cart = Cart.objects.get(cart_id= _cart_id(request))
+    # fetch single object from the database (gets productId of single product and store it in id ) or shows 404 error
+    #SELECT * FROM product WHERE id = product_id;  this quary is being done below
+    product = get_object_or_404(Product, id=product_id) 
+    cart_item = CartItem.objects.get(product=product, cart=cart)#bring us the cart items
+    if cart_item.quantity > 1:
+        cart_item.quantity -= 1
+        cart_item.save()
+    else:
+        cart_item.delete()
+    return redirect('cart')
+
+def remove_cart_item(request, product_id):
+     cart = Cart.objects.get(cart_id= _cart_id(request))
+     product = get_object_or_404(Product, id=product_id) 
+     cart_item = CartItem.objects.get(product=product, cart=cart)
+     cart_item.delete()
+     return redirect('cart')
 
 
 def cart(request,total=0,quantity=0,cart_items=None):
