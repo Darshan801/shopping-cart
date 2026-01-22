@@ -4,7 +4,7 @@ from store.models import Product
 from carts.models import Cart
 from carts.models import CartItem
 from django.core.exceptions import ObjectDoesNotExist
-
+from store.models import Variation
 
 # Create your views here.
 
@@ -18,13 +18,21 @@ def _cart_id(request):
     return cart
 
 def add_cart(request , product_id):
+    product=Product.objects.get(id=product_id) #  to get the product
+    product_variation = []
     if request.method == 'POST':
-         color= request.POST['color']
-         size= request.POST['size']
-         print(color,size)
+         for item in request.POST:
+             key=item
+             value=request.POST[key]
+
+             try:
+                 variation=Variation.objects.get(product=product , variation_category__iexact=key , variation_value__iexact=value)
+                 product_variation.append(variation)
+             except:
+                 pass
     
-#  to get the product
-    product=Product.objects.get(id=product_id)
+
+    
     try:
         # get the cart using the cart_ID presnet in the sessoion
         cart = Cart.objects.get(cart_id=_cart_id(request))
@@ -39,6 +47,10 @@ def add_cart(request , product_id):
 
     try:
         cart_item = CartItem.objects.get(product=product, cart=cart)
+        if len(product_variation) > 0:
+            cart_item.variation.clear()
+            for item in product_variation:
+                cart_item.variation.add(item)
         cart_item.quantity += 1  #increase the quantiry with 1 
         cart_item.save()
     except CartItem.DoesNotExist:
@@ -48,6 +60,10 @@ def add_cart(request , product_id):
             cart = cart ,
 
         )
+        if len(product_variation) > 0:
+            cart_item.variation.clear()
+            for item in product_variation:
+                cart_item.variation.add(item)
         cart_item.save()
     # return HttpResponse(cart_item.quantity)
     # exit()
