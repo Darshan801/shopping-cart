@@ -45,15 +45,34 @@ def add_cart(request , product_id):
 # to put the product inside the cart , product become cartItem and there can be multiple cartItems so 
 # combing cart and  product to get cartItem
 
-    try:
-        cart_item = CartItem.objects.get(product=product, cart=cart)
-        if len(product_variation) > 0:
-            cart_item.variation.clear()
-            for item in product_variation:
-                cart_item.variation.add(item)
-        cart_item.quantity += 1  #increase the quantiry with 1 
-        cart_item.save()
-    except CartItem.DoesNotExist:
+    is_cart_item_exists = CartItem.objects.filter(product=product,cart=cart).exists() # returns true or false if true then 
+    if is_cart_item_exists:
+        cart_item = CartItem.objects.filter(product=product , cart=cart)
+        # existing variations -> database and current variation -> product_variation and item_id->database
+        ex_var_list=[]
+        id = []
+        for item in cart_item:
+            existing_variation = item.variation.all()
+            ex_var_list.append(list(existing_variation))
+            id.append(item.id)
+        print(ex_var_list)
+
+        if product_variation in ex_var_list:
+          #  increase the cart_item quantity
+          index=ex_var_list.index(product_variation)
+          item_id=id[index]
+          item = CartItem.objects.get(product=product, id=item_id)
+          item.quantity+=1
+          item.save()
+
+        else:
+            # create new cart item
+            item = CartItem.objects.create(product=product,quantity=1,cart=cart)
+            if len(product_variation) > 0:
+              item.variation.clear()
+              item.variation.add(*product_variation) # * adds all the product variaitons
+            item.save()
+    else:
         cart_item=CartItem.objects.create(
             product = product,
             quantity = 1,
@@ -62,8 +81,7 @@ def add_cart(request , product_id):
         )
         if len(product_variation) > 0:
             cart_item.variation.clear()
-            for item in product_variation:
-                cart_item.variation.add(item)
+            cart_item.variation.add(*product_variation)
         cart_item.save()
     # return HttpResponse(cart_item.quantity)
     # exit()
