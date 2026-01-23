@@ -87,23 +87,27 @@ def add_cart(request , product_id):
     # exit()
     return redirect('cart')
 
-def remove_cart(request, product_id):
+def remove_cart(request, product_id, cart_item_id):
     cart = Cart.objects.get(cart_id= _cart_id(request))
     # fetch single object from the database (gets productId of single product and store it in id ) or shows 404 error
     #SELECT * FROM product WHERE id = product_id;  this quary is being done below
     product = get_object_or_404(Product, id=product_id) 
-    cart_item = CartItem.objects.get(product=product, cart=cart)#bring us the cart items
-    if cart_item.quantity > 1:
-        cart_item.quantity -= 1
-        cart_item.save()
-    else:
-        cart_item.delete()
+    try:
+        cart_item = CartItem.objects.get(product=product, cart=cart , id=cart_item_id)#bring us the cart items
+        if cart_item.quantity > 1:
+            cart_item.quantity -= 1
+            cart_item.save()
+        else:
+            cart_item.delete()
+    except:
+        pass
     return redirect('cart')
+    
 
-def remove_cart_item(request, product_id):
+def remove_cart_item(request, product_id, cart_item_id):
      cart = Cart.objects.get(cart_id= _cart_id(request))
      product = get_object_or_404(Product, id=product_id) 
-     cart_item = CartItem.objects.get(product=product, cart=cart)
+     cart_item = CartItem.objects.get(product=product, cart=cart ,id=cart_item_id )
      cart_item.delete()
      return redirect('cart')
 
