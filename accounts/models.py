@@ -20,6 +20,9 @@ class MyAccountManager(BaseUserManager):
             last_name=last_name,
         )
         user.set_password(password)
+        
+        # user.is_active = false this will cause problem while login the user 
+        # Django authentication REFUSES to authenticate inactive users. so it should be true
         # user.is_active = True
         user.save(using=self._db)
         return user
