@@ -1,0 +1,16 @@
+{% autoescape off %}
+{% comment %} safeest way of sending email to user {% endcomment %}
+
+Hi {{user.first_name}}
+
+please click on below link to confirm your registration
+
+http://{{ domain }}{% url 'activate' uidb64=uid token=token %}
+
+
+IF its not you,please ignore it
+
+
+
+
+{% endautoescape %}
