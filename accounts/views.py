@@ -107,3 +107,65 @@ def activate(request,uidb64,token):
 @login_required(login_url='login')
 def dashboard(request):
     return render(request, 'accounts/dashboard.html')
+
+
+def forgetpassword(request):
+    if request.method == 'POST':
+        email = request.POST['email']
+        if Account.objects.filter(email=email).exists():
+            user = Account.objects.get(email__exact=email)
+
+
+    #reset password email
+            current_site= get_current_site(request)
+            email_subject = "Reset your password"
+            message = render_to_string('accounts/reset_password_email.html', {
+                'user':user,
+                'domain':current_site,
+                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                'token': default_token_generator.make_token(user),
+            })
+            to_email = email
+            send_email = EmailMessage(email_subject, message, to=[to_email])
+            send_email.send()
+
+            messages.success(request,'Email has been sent to your email address')
+            return redirect('login')
+        else:
+            messages.error(request,'Account doesnot exists')
+            return redirect('forgetpassword')
+
+    return render(request,'accounts/forgetpassword.html')
+
+def resetpassword_validate(request,uidb64,token):
+     try:
+        uid=urlsafe_base64_decode(uidb64).decode()
+        user= Account._default_manager.get(pk=uid)
+     except(TypeError , ValueError , OverflowError , Account.DoesNotExist):
+        user = None
+
+     if user is not None and default_token_generator.check_token(user,token): #to know if this is secure request or not
+        request.session['uid'] = uid
+        messages.success(request,'please reset your password')
+        return redirect('resetpassword')
+     else:
+        messages.error(request,'LInk is already expired')
+        return redirect('login')
+     
+def resetpassword(request):
+    if request.method=='POST':
+        create_password=request.POST['create_password']
+        confirm_password=request.POST['confirm_password']
+
+        if create_password == confirm_password:
+            uid = request.session.get('uid')
+            user = Account.objects.get(pk=uid)
+            user.set_password(create_password) # use set_password instead of password then it will through error
+            user.save()
+            messages.success(request,'password reset successfull')
+            return redirect('login')
+        else:
+            messages.error(request,'Password do not match')
+            return redirect('resetpassword')
+    else:
+        return render(request,'accounts/resetpassword.html')
